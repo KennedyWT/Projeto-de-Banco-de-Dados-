@@ -64,7 +64,7 @@ def ler_perfil_usuario(con_BD, idPerfil_Usuário):
         WHERE idPerfil_Usuário = %s
         """
         cursor.execute(sql, (idPerfil_Usuário,))
-        resultado = cursor.fetchone()  # Obtém o primeiro registro (se houver)
+        resultado = cursor.fetchone()
         if resultado:
             idPerfil_Usuário, Foto_perfil, Biografia, Localização = resultado
             print(f"ID Perfil: {idPerfil_Usuário}")
@@ -452,15 +452,15 @@ def deletar_avaliacao(con_BD, idAvaliação):
 # Códigos Carrinho_de_Compras
 #-----------------------------------------------------------------------------------------------------------------------------
 
-def inserir_carrinho_compras(con_BD, idCarrinho_de_Compras, Data_de_Adição, Quantidade):
+def inserir_carrinho_compras(con_BD, idCarrinho_de_Compras, Data_de_Adição, Quantidade, ID_Loja):
     try:
         cursor = con_BD.cursor()
         
         sql = """
-        INSERT INTO carrinho_de_compras (idCarrinho_de_Compras, Data_de_Adição, Quantidade)
-        VALUES (%s, %s, %s)
+        INSERT INTO carrinho_de_compras (idCarrinho_de_Compras, Data_de_Adição, Quantidade, ID_Loja)
+        VALUES (%s, %s, %s, %s)
         """
-        valores = (idCarrinho_de_Compras, Data_de_Adição, Quantidade)
+        valores = (idCarrinho_de_Compras, Data_de_Adição, Quantidade, ID_Loja)
         cursor.execute(sql, valores)
         con_BD.commit()
         print("Carrinho inserido com sucesso.")
@@ -473,7 +473,7 @@ def ler_carrinho_de_compras(con_BD, idCarrinho_de_Compras):
     try:
         cursor = con_BD.cursor()
         sql = """
-        SELECT idCarrinho_de_Compras, Data_de_Adição, Quantidade
+        SELECT idCarrinho_de_Compras, Data_de_Adição, Quantidade, ID_Loja
         FROM carrinho_de_compras
         WHERE idCarrinho_de_Compras = %s
         """
@@ -481,10 +481,11 @@ def ler_carrinho_de_compras(con_BD, idCarrinho_de_Compras):
         resultado = cursor.fetchone()  # Obtém o primeiro registro (se houver)
         if resultado:
             # Desempacotando o resultado da consulta
-            idCarrinho, Data_de_Adição, Quantidade = resultado
+            idCarrinho, Data_de_Adição, Quantidade, ID_Loja = resultado
             print(f"ID carrinho de compras: {idCarrinho}")
             print(f"Data de adição: {Data_de_Adição}")
             print(f"Quantidade de itens: {Quantidade}")
+            print(f"ID Loja: {ID_Loja}")
         else:
             print("Carrinho não encontrado.")
     except Error as e:
@@ -1116,6 +1117,97 @@ def deletar_suporte(con_BD, Protocolo):
         cursor.close()
 
 #-----------------------------------------------------------------------------------------------------------------------------
+# Códigos Loja
+#-----------------------------------------------------------------------------------------------------------------------------
+
+def inserir_loja(con_BD, idLoja, Preço, ID_Jogo):
+    try:
+        cursor = con_BD.cursor()
+        
+        sql = """
+        INSERT INTO loja (idLoja, Preço, ID_Jogo)
+        VALUES (%s, %s, %s)
+        """
+        valores = (idLoja, Preço, ID_Jogo)
+        cursor.execute(sql, valores)
+        con_BD.commit()
+        print("Loja inserido com sucesso.")
+    except Error as e:
+        print(f"Erro ao inserir loja: {e}")
+    finally:
+        cursor.close()
+
+def ler_loja(con_BD, idLoja):
+    try:
+        cursor = con_BD.cursor()
+        sql = """
+        SELECT idLoja, Preço, ID_Jogo
+        FROM loja
+        WHERE idLoja = %s
+        """
+        cursor.execute(sql, (idLoja,))
+        resultado = cursor.fetchone()  # Obtém o primeiro registro (se houver)
+        if resultado:
+            # Desempacotando o resultado da consulta
+            idLoja, Preço, ID_Jogo = resultado
+            print(f"ID Loja: {idLoja}")
+            print(f"Preço: {Preço}")
+            print(f"ID jogo: {ID_Jogo}")
+        else:
+            print("Loja não encontrada.")
+    except Error as e:
+        print(f"Erro ao ler carrinho do usuário: {e}")
+    finally:
+        cursor.close()
+
+
+def atualizar_loja(con_BD, idLoja):
+    ler_carrinho_de_compras(conexao, idLoja)
+    print("\nEscolha o campo que deseja atualizar:")
+    print("1. Preço")
+    print("2. Sair")
+    
+    escolha = input("Digite o número da opção desejada: ")
+    
+    try:
+        cursor = con_BD.cursor()
+        if escolha == '1':
+            novo_preco = input("Digite o novo preço: ")
+            sql = "UPDATE loja SET Preço = %s WHERE idLoja = %s"
+            valores = (novo_preco, idLoja)
+            cursor.execute(sql, valores)
+        elif escolha == '2':
+            print("Saindo da atualização de dados da loja.")
+            return
+        else:
+            print("Opção inválida.")
+            return
+        
+        con_BD.commit()
+        print("Dados da loja atualizados com sucesso.")
+    
+    except Error as e:
+        print(f"Erro ao atualizar dados da loja: {e}")
+    
+    finally:
+        cursor.close()
+        
+def deletar_loja(con_BD, idLoja): 
+    try:
+        cursor = con_BD.cursor()
+        sql = """
+        DELETE FROM loja
+        WHERE idLoja = %s
+        """
+        cursor.execute(sql, (idLoja,))
+        con_BD.commit()
+        print("Loja deletada com sucesso.")
+    except Error as e:
+        print(f"Erro ao deletar loja: {e}")
+    finally:
+        cursor.close()
+        
+#-----------------------------------------------------------------------------------------------------------------------------
 dados_usuario = {
     "idUsuario": "0001",
     "Data_Nascimento": "2000-01-01",
@@ -1123,9 +1215,9 @@ dados_usuario = {
     "Data_Cadastro": "2015-03-02",
     "Email": "Joãozin123@gmail.com",
     "Telefone": "61985561228",
-    "ID_Biblioteca": 5,
+    "ID_Biblioteca": 245,
     "ID_Perfil_Usuário": 22,
-    "ID_Carrinho_de_Compras": 1
+    "ID_Carrinho_de_Compras": 3405
 }
 
 
@@ -1154,7 +1246,7 @@ dados_usuario = {
 #atualizar_usuario(conexao, 1)
 #deletar_usuario(conexao, 1)
 
-#inserir_carrinho_compras(conexao, 3405, '2024-02-09',2)
+#inserir_carrinho_compras(conexao, 3405, '2024-02-09',2, 58)
 #ler_carrinho_de_compras(conexao, 3405)
 #atualizar_carrinho(conexao, 3405)
 #deletar_carrinho(conexao, 3405)
@@ -1194,3 +1286,9 @@ dados_usuario = {
 #ler_pagamento(conexao, 78)
 #atualizar_pagamento(conexao, 78)
 #deletar_pagamento(conexao, 78)
+
+#inserir_loja(conexao, 58, 'R$220,00', 77)
+#ler_loja(conexao, 58)
+#atualizar_loja(conexao, 58)
+#deletar_loja(conexao, 58)
+            
